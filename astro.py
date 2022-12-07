@@ -1,4 +1,4 @@
-#!python -i
+#! usr/bin/env python
 from math import ceil
 
 from ephem import *

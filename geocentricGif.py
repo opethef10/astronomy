@@ -1,34 +1,36 @@
-from io import BytesIO
+#! usr/bin/env python
 from datetime import datetime, timedelta
+from io import BytesIO
 
 from ephem import *
-import matplotlib.pyplot as plt
 import imageio
+import matplotlib.pyplot as plt
 
-gezegenler = Moon(), Mercury(), Venus(), Sun(), Mars(), Jupiter(), Saturn(), Uranus(), Neptune()
-başlangıç = datetime.utcnow()
-tarihÜreteci = (başlangıç + timedelta(gün) for gün in range(0, 1000, 5))
-resimler = []
+planets = Moon(), Mercury(), Venus(), Sun(), Mars(), Jupiter(), Saturn(), Uranus(), Neptune()
+start = datetime.utcnow()
+dateGenerator = (start + timedelta(day) for day in range(0, 1000, 5))
+images = []
 
-for tarih in tarihÜreteci:
+for date in dateGenerator:
     plt.axes(projection='polar')
     plt.title(f'Geocentric view at {tarih:%Y/%m/%d %H:%M:%S} UTC',fontsize=10)
 
-    for r, gezegen in enumerate(gezegenler):
-        gezegen.compute(tarih)
-        mark='o'
-        if gezegen.name=="Moon":
-            mark='x'
-            r=0.5
-        elif gezegen.name=="Sun":
-            mark='*'
-        plt.polar(gezegen.ra,r,mark,label = gezegen.name)
+    for radius, planet in enumerate(planets):
+        planet.compute(date)
+        marker = 'o'
+        if planet.name=="Moon":
+            marker = 'x'
+            radius = 0.5
+        elif planet.name=="Sun":
+            mark = '*'
+        plt.polar(planet.ra, radius, marker=marker, label=planet.name)
+    
     plt.legend(loc='upper center',bbox_to_anchor=(1.21, 0.8),fontsize="small")
     plt.gca().axes.get_yaxis().set_ticklabels([])
     
     buffer = BytesIO()
     plt.savefig(buffer)
-    resimler.append(imageio.imread(buffer.getvalue()))
+    images.append(imageio.imread(buffer.getvalue()))
     plt.close()
 
-imageio.mimsave(f"geo{başlangıç:%Y%m%d_%H%M%S}.gif", resimler)
+imageio.mimsave(f"geo{start:%Y%m%d_%H%M%S}.gif", images)
